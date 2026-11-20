@@ -1,8 +1,7 @@
 import numpy as np
 #cell ids
-VACUUM = 0
-WATER = 1
-FUEL = 2
+from material_props import VACUUM, WATER, FUEL
+
 #other constants
 ASSEMBLY_PITCH = 21
 
