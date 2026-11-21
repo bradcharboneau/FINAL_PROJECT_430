@@ -6,7 +6,7 @@ import numpy as np
 import matplotlib.pyplot as plt
 
 n_assemblies = 8
-refinement = [1,2,4,8,16,32,]
+refinement = [1,2,4,8,16,32]
 L = n_assemblies * ASSEMBLY_PITCH
 k_ex = k_exact(materials[FUEL], L)
 h_vals = []
