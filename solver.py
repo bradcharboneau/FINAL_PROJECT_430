@@ -26,7 +26,7 @@ def build_matrices(cell_map, h, materials):
             xs = materials[mat_id]
             A1[p,p] += xs["sig_a"][0] + xs["sig_s12"]
             A2[p,p] += xs["sig_a"][1]
-            F1[p] = xs["nu_sig_f"][0]
+            F1[p] = xs["nu_sig_f"][0] #using vectors since its cheaper than a diag matrix
             F2[p] = xs["nu_sig_f"][1]
             S12[p] = xs["sig_s12"]
             for di, dj in [(-1,0), (1,0), (0,-1), (0,1)]:
@@ -48,9 +48,28 @@ def build_matrices(cell_map, h, materials):
     return A1.tocsc(), A2.tocsc(), F1, F2, S12
 #power iteration time, arbitrary stopping criteria
 def power_iteration(A1, A2, F1, F2, S12, tol_k=1e-8, tol_Q=1e-6, max_iter=1000):
+    #apparently this is the best way to make a cheap solve
     lu1 = spla.splu(A1)
     lu2 = spla.splu(A2)
-
+    N = A1.shape[0] #check cell number
+    k = 1.0 #starting guess, hope for 1!
+    rng = np.random.default_rng(24)
+    phi1 = rng.random(N)
+    phi2 = rng.random(N)
+    #random initial guess, i pay attention
+    Q = F1 * phi1 + F2 * phi2 
+    for it in range(max_iter):
+        phi1 = lu1.solve(Q / k)
+        phi2 = lu2.solve(S12 * phi1 / k)
+        Q_new = F1 * phi1 + F2 * phi2
+        k_new = np.sum(Q_new) / np.sum(Q)
+        dk = abs(k_new - k)
+        dQ = np.max(np.abs(Q_new / Q_new.sum() - Q / Q.sum()))
+        Q = Q_new
+        k = k_new
+        if dk < tol_k and dQ < tol_Q:
+            break
+    return k, phi1, phi2, it + 1
 
 
 ##test block
@@ -60,6 +79,8 @@ if __name__ == "__main__":
 
     cell_map = make_square_mesh(2)
     A1, A2, F1, F2, S12 = build_matrices(cell_map, 1.0, materials)
+    k, phi1, phi2, n_it = power_iteration(A1, A2, F1, F2, S12)
+    print(k, n_it)
 
     print(A1.shape, F1.shape)
     print(A1.toarray())
