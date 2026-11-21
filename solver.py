@@ -57,14 +57,14 @@ def power_iteration(A1, A2, F1, F2, S12, tol_k=1e-8, tol_Q=1e-6, max_iter=1000):
     phi1 = rng.random(N)
     phi2 = rng.random(N)
     #random initial guess, i pay attention
-    Q = F1 * phi1 + F2 * phi2 
+    Q = F1 * phi1 + F2 * phi2 #fission source
     for it in range(max_iter):
-        phi1 = lu1.solve(Q / k)
-        phi2 = lu2.solve(S12 * phi1 / k)
+        phi1 = lu1.solve(Q / k) #neutrons born fast
+        phi2 = lu2.solve(S12 * phi1) #downscattering
         Q_new = F1 * phi1 + F2 * phi2
-        k_new = np.sum(Q_new) / np.sum(Q)
-        dk = abs(k_new - k)
-        dQ = np.max(np.abs(Q_new / Q_new.sum() - Q / Q.sum()))
+        k_new = k * np.sum(Q_new) / np.sum(Q)
+        dk = abs(k_new - k) / k_new
+        dQ = np.max(np.abs(Q_new / Q_new.sum() - Q / Q.sum())) #checking nomralized shape
         Q = Q_new
         k = k_new
         if dk < tol_k and dQ < tol_Q:
@@ -77,8 +77,10 @@ if __name__ == "__main__":
     from mesh import make_square_mesh, refine_mesh
     from material_props import materials
 
-    cell_map = make_square_mesh(2)
-    A1, A2, F1, F2, S12 = build_matrices(cell_map, 1.0, materials)
+    
+    cell_map, h = refine_mesh(make_square_mesh(3), 4)   # need this to add h, square mesh didnt have h in it 
+
+    A1, A2, F1, F2, S12 = build_matrices(cell_map, h, materials)
     k, phi1, phi2, n_it = power_iteration(A1, A2, F1, F2, S12)
     print(k, n_it)
 
