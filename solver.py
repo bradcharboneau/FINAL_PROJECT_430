@@ -84,6 +84,6 @@ if __name__ == "__main__":
     k, phi1, phi2, n_it = power_iteration(A1, A2, F1, F2, S12)
     print(k, n_it)
 
-    print(A1.shape, F1.shape)
-    print(A1.toarray())
-    print(F2)
+    #print(A1.shape, F1.shape)
+    #print(A1.toarray())
+    #print(F2)
