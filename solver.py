@@ -47,7 +47,7 @@ def build_matrices(cell_map, h, materials):
 
     return A1.tocsc(), A2.tocsc(), F1, F2, S12
 #power iteration time, arbitrary stopping criteria
-def power_iteration(A1, A2, F1, F2, S12, tol_k=1e-8, tol_Q=1e-6, max_iter=1000):
+def power_iteration(A1, A2, F1, F2, S12, tol_k=1e-11, tol_Q=1e-6, max_iter=10000):
     #apparently this is the best way to make a cheap solve
     lu1 = spla.splu(A1)
     lu2 = spla.splu(A2)
@@ -64,7 +64,7 @@ def power_iteration(A1, A2, F1, F2, S12, tol_k=1e-8, tol_Q=1e-6, max_iter=1000):
         Q_new = F1 * phi1 + F2 * phi2
         k_new = k * np.sum(Q_new) / np.sum(Q)
         dk = abs(k_new - k) / k_new
-        dQ = np.max(np.abs(Q_new / Q_new.sum() - Q / Q.sum())) #checking nomralized shape
+        dQ = np.max(np.abs(Q_new / Q_new.max() - Q / Q.max())) 
         Q = Q_new
         k = k_new
         if dk < tol_k and dQ < tol_Q:
