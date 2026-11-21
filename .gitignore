@@ -1,0 +1,5 @@
+materials/
+__pycache__/
+.vscode/
+.png
+*.png
